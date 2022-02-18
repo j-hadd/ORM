@@ -1,0 +1,44 @@
+# ENGINE generated files #
+##########################
+node_modules/
+npm-debug.log
+yarn-error.log
+
+
+# OS generated files #
+######################
+.DS_Store
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Visual Studio Code #
+######################
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Dreamweaver generated files #
+###############################
+_notes
+_compareTemp
+configs/
+dwsync.xml
+dw_php_codehinting.config
+*.mno
+
+# Windows generated files #
+###########################
+*.dll
+*.exe
+*.o
+*.so
+
+# Windows shortcuts
+###########################
+*.lnk
+go\.htm
