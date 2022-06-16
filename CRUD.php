@@ -2,8 +2,8 @@
 /** 
  * Class to execute the CRUD on data base
  * 
- * @author Jad Haddouch <jad.haddouch@prezenz.com>
- * @docauthor Jad Haddouch <jad.haddouch@prezenz.com>
+ * @author Jad Haddouch <jad.haddouch@gmail.com>
+ * @docauthor Jad Haddouch <jad.haddouch@gmail.com>
  * @copyright Copyright 2019 Prezenz
  */
 
