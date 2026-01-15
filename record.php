@@ -1,18 +1,20 @@
 <?php
 
-class record extends CRUD {
-	var $table_name = 'record';
+namespace ORM;
+
+class record extends \ORM\CRUD {
+	protected string $table_name = 'record';
 	
-	var $table_fields = array('id', 'txt');
-	var $add_user_log = false;
+	protected array $table_fields = array('id', 'txt');
+	protected bool $add_user_log = false;
 	
-	var $read_fields_strict = true;
-	var $read_fields = array(
+	protected bool $read_fields_strict = true;
+	protected array|false $read_fields = array(
 		'record.id AS id', 'record.txt AS txt',
 		'record_join.txt AS join_txt'
 	);
 	
-	var $joins = array(
+	protected array $joins = array(
 		'LEFT_JOIN' => array(
 			array(
 				'table_name' => 'record_join',
@@ -21,7 +23,7 @@ class record extends CRUD {
 		),
 	);
 	
-	var $hasMany = array(
+	protected array|false $hasMany = array(
 		'sub_records' => array(
 			'foreign_key' => 'id',
 			'local_key' => 'record_id',
@@ -60,5 +62,3 @@ class record extends CRUD {
 		),
 	);
 }
-
-?>

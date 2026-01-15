@@ -1,4 +1,7 @@
 <?php
+
+namespace ORM;
+
 /** 
  * Class to execute the CRUD on data base
  * 
@@ -12,49 +15,54 @@ class CRUD {
 	/**
 	 * Tn connection handler
 	 */
-	var $db_connector = false;
-	var $request_maker = false;
+	protected \ORM\db_connector\base|false $db_connector = false;
+	protected \ORM\request_maker\base|false $request_maker = false;
 	
-	var $table_name = '';
+	protected string $table_name = '';
 	
-	var $table_fields = array();
-	var $add_user_log = true;
+	protected array $table_fields = array();
+	protected bool $add_user_log = true;
 	
-	var $read_fields_strict = false;
-	var $read_fields = false;
+	protected bool $read_fields_strict = false;
+	protected array|false $read_fields = false;
 	
-	var $joins = array();
+	protected array $joins = array();
 	
-	var $read_conditions = array();
-	var $read_conditions_glue = ') AND (';
+	protected array $read_conditions = array();
+	protected string $read_conditions_glue = ') AND (';
 	
-	var $order_by_in_cfg = true;
-	var $order_by = array(array('id', 'ASC'));
+	protected bool $order_by_in_cfg = true;
+	protected array $order_by = array(array('id', 'ASC'));
 	
-	var $limit_in_cfg = true;
-	var $limit = array(0, 0);
+	protected bool $limit_in_cfg = true;
+	protected array $limit = array(0, 0);
 	
-	var $data = array();
+	public array $data = array();
 	
-	var $hasMany = false;
+	protected array|false $hasMany = false;
 	
-	var $record_name = '';
+	protected string $record_name = '';
 	
-	var $all_records_size = 0;
+	protected int $all_records_size = 0;
 	
-	var $add_authorised_methodes = false;
-	var $authorised_methodes = array('create', 'read', 'update', 'delete');
+	protected bool $add_authorised_methodes = false;
+	protected array $authorised_methodes = array('create', 'read', 'update', 'delete');
 	
 	
 	
 	/**
 	 * Constructor
 	 *
-	 * @param string $db_connector The data base connector
-	 * @param string $request_maker The data base requeste maker
+	 * @param _pdo $db_connector The data base connector
+	 * @param MySQL $request_maker The data base requeste maker
 	 * @param array $cfg
 	 */
-	public function __construct ($db_connector, $request_maker, &$cfg) {
+	public function __construct (
+		\ORM\db_connector\base $db_connector,
+		\ORM\request_maker\MySQL $request_maker,
+		array &$cfg
+	)
+	{
 		//var_dump($cfg);
 		
 		$this->db_connector = $db_connector;
@@ -120,9 +128,10 @@ class CRUD {
 	
 	
 	/**
-	 * Destructor 
+	 * Destructor
 	 */
-	public function __destruct () {
+	public function __destruct ()
+	{
 		unset($this->db_connector, $this->request_maker);
 	}
 	
@@ -131,7 +140,8 @@ class CRUD {
 	/*
 	 * create
 	 */
-	public function create () {
+	public function create (): array
+	{
 		$this->db_connector->executeQuery($this->request_maker->create($this->table_name));
 		
 		$this->data['id'] = $this->db_connector->getLastInsertedId();
@@ -146,7 +156,11 @@ class CRUD {
 	/*
 	 * read
 	 */
-	public function read ($read_conditions = false, $read_conditions_glue = ') AND (') {
+	public function read (
+		mixed $read_conditions = false,
+		string $read_conditions_glue = ') AND ('
+	): array
+	{
 		if ($read_conditions !== false && is_array($read_conditions)) { $this->setReadCondition($read_conditions, $read_conditions_glue); }
 		
 		//var_dump($this->table_name, $this->order_by);
@@ -193,7 +207,8 @@ class CRUD {
 	/*
 	 * readHasMany
 	 */
-	public function readHasMany () {
+	public function readHasMany (): void
+	{
 		if ($this->hasMany !== false) {
 			$foreign_key_values = array();
 			
@@ -242,7 +257,11 @@ class CRUD {
 	/*
 	 * setReadCondition
 	 */
-	public function setReadCondition ($read_conditions, $read_conditions_glue = ') AND (') {
+	public function setReadCondition (
+		array $read_conditions,
+		string $read_conditions_glue = ') AND ('
+	): void
+	{
 		$this->read_conditions = $read_conditions;
 		
 		$this->read_conditions_glue = $read_conditions_glue;
@@ -253,7 +272,8 @@ class CRUD {
 	/*
 	 * setReadCondition
 	 */
-	public function setReadOrderBy ($order_by) {
+	public function setReadOrderBy (array $order_by): void
+	{
 		$this->order_by = $order_by;
 	}
 	
@@ -262,7 +282,8 @@ class CRUD {
 	/*
 	 * update
 	 */
-	public function update () {
+	public function update (): array
+	{
 		//echo 'CRUD->update : $this->data = '; var_dump($this->data); echo "\n";
 		
 		$this->db_connector->executeQuery($this->request_maker->update($this->table_name, $this->data, $this->table_fields));
@@ -277,9 +298,10 @@ class CRUD {
 	
 	
 	/*
-	 * updateHasMany 
+	 * updateHasMany
 	 */
-	private function updateHasMany () {
+	private function updateHasMany (): void
+	{
 		if ($this->hasMany !== false) {
 			
 			foreach ($this->hasMany as $hasMany_name => $hasMany) {
@@ -332,9 +354,10 @@ class CRUD {
 	
 	
 	/*
-	 * delete 
+	 * delete
 	 */
-	public function delete () {		
+	public function delete (): array
+	{
 		$this->db_connector->executeQuery($this->request_maker->delete($this->table_name, $this->data));
 		
 		$this->deleteHasMany();
@@ -347,9 +370,10 @@ class CRUD {
 	
 	
 	/*
-	 * deleteHasMany 
+	 * deleteHasMany
 	 */
-	private function deleteHasMany () {
+	private function deleteHasMany (): void
+	{
 		if ($this->hasMany !== false) {
 			
 			foreach ($this->hasMany as $hasMany_name => $hasMany) {
@@ -378,18 +402,24 @@ class CRUD {
 	
 	
 	/*
-	 * isMethodeExistAndAuthorised 
+	 * isMethodeExistAndAuthorised
 	 */
-	public function isMethodeExistAndAuthorised ($methode) {
+	public function isMethodeExistAndAuthorised (string $methode): bool
+	{
 		return in_array($methode, $this->authorised_methodes) && method_exists($this, $methode);
 	}
 	
 	
 	
 	/*
-	 * setData 
+	 * setData
 	 */
-	public function setData (&$data, $field, $value) {
+	public function setData (
+		array &$data,
+		string $field,
+		mixed $value
+	): void
+	{
 		if ($this->record_name !== '') { $data[$this->record_name][$field] = $value; }
 		else { $data[$field] = $value; }
 	}
@@ -397,12 +427,15 @@ class CRUD {
 	
 	
 	/*
-	 * getData 
+	 * getData
 	 */
-	public function getData (&$data, $field) {
+	public function getData (
+		array &$data,
+		string $field
+	): mixed
+	{
 		if ($this->record_name !== '') { return isset($data[$this->record_name][$field]) ? $data[$this->record_name][$field] : false; }
 		
 		return isset($data[$field]) ? $data[$field] : false;
 	}
 }
-?>

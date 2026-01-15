@@ -1,4 +1,9 @@
 <?php
+
+namespace ORM\response;
+
+include_once 'response/base.php';
+
 /** 
  * 
  * @author Jad Haddouch <jad.haddouch@gmail.com>
@@ -6,12 +11,13 @@
  * @copyright Copyright 2013 Jad Haddouch
  */
 
-class simple_response {
+class simple implements \ORM\response\base {
 	
 	/*
 	 * 
 	 */
-	public function customOutput ($json) {
+	public function customOutput (mixed $json): void
+	{
 		echo('<pre>' . print_r($json, true) . '</pre>');
 	}
 	
@@ -20,7 +26,8 @@ class simple_response {
 	/*
 	 * 
 	 */
-	public function normalize ($params = array()) {
+	public function normalize (array $params = array()): void
+	{
 		global $additional_output;
 
 		$data_key = isset($params['data_key']) ? $params['data_key'] : 'data';
@@ -55,10 +62,9 @@ class simple_response {
 	 * @param $msg The bdd message
 	 * @return string
 	 */
-	public function dbError ($msg) {
-		$this->normalize(array(
-			'msg' => $msg
-		));
+	public function dbError (string $msg): void
+	{
+		$this->normalize(array('msg' => $msg));
 	}
 	
 	
@@ -66,9 +72,8 @@ class simple_response {
 	/*
 	 * 
 	 */
-	public function apiError ($params) {
+	public function apiError (array $params): void
+	{
 		$this->normalize($params);
 	}
 }
-
-?>
