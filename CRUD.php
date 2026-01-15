@@ -161,7 +161,10 @@ class CRUD {
 		string $read_conditions_glue = ') AND ('
 	): array
 	{
-		if ($read_conditions !== false && is_array($read_conditions)) { $this->setReadCondition($read_conditions, $read_conditions_glue); }
+		if ($read_conditions !== false && is_array($read_conditions))
+		{
+			$this->setReadCondition($read_conditions, $read_conditions_glue); 
+		}
 		
 		//var_dump($this->table_name, $this->order_by);
 		$this->data = $this->db_connector->fetchAssoc(
