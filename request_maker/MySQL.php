@@ -1,4 +1,9 @@
 <?php
+
+namespace ORM\request_maker;
+
+include_once 'request_maker/base.php';
+
 /** 
  * Class to make mySQL queries
  * 
@@ -7,12 +12,13 @@
  * @copyright Copyright 2013 Jad Haddouch
  */
 
-class MySQL {
+class MySQL implements \ORM\request_maker\base {
 	
 	/*
 	 * create
 	 */
-	public function create ($table_name) {
+	public function create (string $table_name): string
+	{
 		return 'INSERT INTO ' . $table_name . ' (id) VALUES (NULL);';
 	}
 	
@@ -22,22 +28,28 @@ class MySQL {
 	 * read
 	 */
 	public function read (
-		$fields, 
-		$table_name, 
-		$joins = array(), 
-		$conditions = array(), $conditions_glue = ') AND (', 
-		$sorters = array(array('id', 'ASC')), 
-		$limit = array(0, 0)
-	) {
+		array $fields,
+		string $table_name,
+		array $joins = array(),
+		array $conditions = array(), string $conditions_glue = ') AND (',
+		array $sorters = array(array('id', 'ASC')),
+		array $limit = array(0, 0)
+	): string
+	{
 		$LEFT_JOINS = array();
-		if (isset($joins['LEFT_JOIN'])) {
-			foreach ($joins['LEFT_JOIN'] as $LEFT_JOIN) {
-				$LEFT_JOINS[] = 'LEFT JOIN ' . $LEFT_JOIN['table_name'] . ' ON (' . implode(isset($LEFT_JOIN['conditions_glue']) ? $LEFT_JOIN['conditions_glue'] : ') AND (', $LEFT_JOIN['conditions']) . ')';
+		if (isset($joins['LEFT_JOIN']))
+		{
+			foreach ($joins['LEFT_JOIN'] as $LEFT_JOIN)
+			{
+				$LEFT_JOINS[] =
+					'LEFT JOIN ' . $LEFT_JOIN['table_name'] .
+					' ON (' . implode(isset($LEFT_JOIN['conditions_glue']) ? $LEFT_JOIN['conditions_glue'] : ') AND (', $LEFT_JOIN['conditions']) . ')';
 			}
 		}
 		
 		$order_by = array();
-		foreach ($sorters as $sorter) {
+		foreach ($sorters as $sorter) 
+		{
 			$order_by[] = implode(' ', $sorter);
 		}
 		
@@ -56,7 +68,12 @@ class MySQL {
 	/*
 	 * update
 	 */
-	public function update ($table_name, $data, $table_fields) {
+	public function update (
+		string $table_name,
+		array $data,
+		array $table_fields
+	): string
+	{
 		$set = array();
 		
 		//echo 'MySQL->update : $table_fields = '; var_dump($table_fields); echo "\n";
@@ -86,7 +103,11 @@ class MySQL {
 	/*
 	 * delete
 	 */
-	public function delete ($table_name, $data) {
+	public function delete (
+		string $table_name,
+		array $data
+	): string
+	{
 		return 'DELETE FROM ' . $table_name . ' WHERE ' . $table_name . '.id = ' . intval($data['id']) . ';';
 	}
 	
@@ -95,7 +116,11 @@ class MySQL {
 	/*
 	 * _delete
 	 */
-	public function _delete ($table_name, $condition) {
+	public function _delete (
+		string $table_name,
+		string $condition
+	): string
+	{
 		return 'DELETE FROM ' . $table_name . ' WHERE ' . $condition . ';';
 	}
 	
@@ -104,10 +129,10 @@ class MySQL {
 	/*
 	 * secureData
 	 */
-	public function secureData ($data) {
+	public function secureData (string $data): string
+	{
 		$search =  array("'", );
 		$replace = array("\'",);
-		return str_replace($search, $replace, $data); 
+		return str_replace($search, $replace, $data);
 	}
 }
-?>

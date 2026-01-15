@@ -1,4 +1,10 @@
 <?php
+
+namespace ORM\db_connector;
+
+include_once 'db_connector\base.php';
+include_once 'response\base.php';
+
 /** 
  * mysql data base conector class
  * 
@@ -7,12 +13,12 @@
  * @copyright Copyright 2013 Jad Haddouch
  */
 
-class _pdo {
+class _pdo implements \ORM\db_connector\base {
 	
 	/**
 	 * Tn connection handler
 	 */
-	var $con = false;
+	private \PDO|false $con = false;
 	
 	
 	
@@ -20,14 +26,14 @@ class _pdo {
 	 * response Object
 	 * this object normalize the service response
 	 */
-	var $response = false;
+	private \ORM\response\base|false $response = false;
 	
 	
 	
 	/**
 	 * A SELECT query result
 	 */
-	var $results = false;
+	private \PDOStatement|false $results = false;
 	
 	
 	
@@ -39,13 +45,22 @@ class _pdo {
 	 * @param string $password The data base password
 	 * @param object $response The respons object
 	 */
-	public function __construct ($dsn, $user, $password, $response) {
-		try {
-			$this->con = new PDO($dsn, $user, $password);
-			$this->con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	public function __construct (
+		string $dsn,
+		string $user,
+		string $password,
+		\ORM\response\base $response
+	)
+	{
+		try
+		{
+			$this->con = new \PDO($dsn, $user, $password);
+			$this->con->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 			
 			$this->response = $response === false ? new json_response() : $response;
-		} catch (PDOException $e) {
+		}
+		catch (\PDOException $e)
+		{
 			die('DB ERROR connection error ' . $e->getMessage());
 			//$this->error('connection error ' . $e->getMessage());
 		}
@@ -56,8 +71,12 @@ class _pdo {
 	/**
 	 * Destructor 
 	 */
-	public function __destruct () {
-        if ($this->results !== false) { $this->results->closeCursor(); }
+	public function __destruct ()
+	{
+        if ($this->results !== false)
+		{
+			$this->results->closeCursor();
+		}
 		$this->con = false;
     }
 	
@@ -70,32 +89,27 @@ class _pdo {
 	 * @param string $sql The sql query
 	 * @return array Return the query result
 	 */
-	public function executeQuery ($sql, $SELECT = false) {
-		if ($sql === false) { return; }
+	public function executeQuery (
+		string|false $sql,
+		bool $SELECT = false
+	): \PDOStatement|int|null
+	{
+		if ($sql === false) { return null; }
 		
 		$this->debug($sql);
 			
 		$fn = $SELECT === true || strpos($sql, 'SELECT') === 0 ? 'query' : 'exec';
 		
-		try {
-			return $this->con->$fn($sql);	
-		} catch (PDOException $e) {
-			$this->error('Execute query error : ' . $sql . ', Query error : ' . $e->getMessage());	
+		try
+		{
+			return $this->con->$fn($sql);
 		}
-		
-		/*if (strpos($sql, 'SELECT') === 0) {
-			try {
-				return $this->con->query($sql);	
-			} catch (PDOException $e) {
-				$this->error('Execute query error : ' . $sql . ', Query error : ' . $e->getMessage());	
-			}
-		} else {
-			try {
-				return $this->con->exec($sql);	
-			} catch (PDOException $e) {
-				$this->error('Execute query error : ' . $sql . ', Query error : ' . $e->getMessage());	
-			}
-		}*/
+		catch (\PDOException $e)
+		{
+			$this->error('Execute query error : ' . $sql . ', Query error : ' . $e->getMessage());
+		}
+
+		return null;
 	}
 	
 	
@@ -106,12 +120,13 @@ class _pdo {
 	 * @param string $sql The sql query
 	 * @return array Return the query result
 	 */
-	public function fetchAssoc($sql) {
+	public function fetchAssoc(string $sql): array
+	{
 		$data = array();
 		
 		$this->results = $this->executeQuery($sql, true);
 		
-		while ($result = $this->results->fetch(PDO::FETCH_ASSOC)) {
+		while ($result = $this->results->fetch(\PDO::FETCH_ASSOC)) {
 			//$data[] = objectToArray($result);
 			$data[] = $result;
 		}
@@ -126,7 +141,8 @@ class _pdo {
 	 *
 	 * @return int The last inserted id
 	 */
-	public function getLastInsertedId () {
+	public function getLastInsertedId (): int
+	{
 		return $this->con->lastInsertId();
 	}
 	
@@ -138,8 +154,9 @@ class _pdo {
 	 * @param mixed $data The data to secure
 	 * @return string Return a secured data
 	 */
-	public function secureData ($data) {
-		return $data;	
+	public function secureData (mixed $data): mixed
+	{
+		return $data;
 	} 
 	
 	
@@ -149,7 +166,8 @@ class _pdo {
 	 *
 	 * @param string $msg The message
 	 */
-	private function error ($msg) {
+	private function error (string $msg): void
+	{
 		$this->response->dbError($msg);
 	}
 	
@@ -158,11 +176,11 @@ class _pdo {
 	/**
 	 * 
 	 */
-	private function debug ($var) {
+	private function debug (mixed $var): void
+	{
 		if (($_SERVER['REMOTE_ADDR'] == '95.143.48.98' || $_SERVER['REMOTE_ADDR'] == '86.200.244.108' || $_SERVER['REMOTE_ADDR'] == '127.0.0.1') && isset($_GET['debug'])) { 
 			var_dump($var);
 			echo "<br />\n";
 		}
 	}
 }
-?>
